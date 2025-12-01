@@ -1,0 +1,54 @@
+import * as THREE from 'three';
+
+export function setupScene() {
+    // Renderer setup
+    const canvas = document.getElementById('avatar-canvas');
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x808080); // Simple grey background
+
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 2;
+    camera.position.y = 0.5;
+
+    // Lighting setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+
+    // Updatable objects list
+    const updatables = [];
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animation loop
+    const animate = () => {
+        requestAnimationFrame(animate);
+
+        // Call update on all updatable objects
+        for (const object of updatables) {
+            object.update();
+        }
+
+        renderer.render(scene, camera);
+    };
+
+    return { scene, camera, renderer, animate, updatables };
+}
