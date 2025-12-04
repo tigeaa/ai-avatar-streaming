@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Avatar Streaming</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="settings-panel">
+        <div class="settings-row">
+            <label for="ai-service">AI Service:</label>
+            <select id="ai-service">
+                <option value="gemini">Gemini</option>
+                <option value="huggingface">Hugging Face</option>
+            </select>
+        </div>
+        <div class="settings-row" id="gemini-settings">
+            <label for="gemini-api-key">Gemini API Key:</label>
+            <input type="password" id="gemini-api-key" placeholder="Enter Gemini API Key">
+        </div>
+        <div class="settings-row" id="huggingface-settings" style="display: none;">
+            <label for="hf-api-key">HF API Key:</label>
+            <input type="password" id="hf-api-key" placeholder="Enter Hugging Face API Key">
+            <label for="hf-model-url">Model URL:</label>
+            <input type="text" id="hf-model-url" placeholder="Enter Model Inference URL">
+        </div>
+        <button id="save-settings-button">Save Settings</button>
+    </div>
+
+    <div id="container">
+        <canvas id="avatar-canvas"></canvas>
+    </div>
+
+    <div id="status-display"></div>
+
+    <div id="ui-container">
+        <textarea id="text-input" rows="3" placeholder="ここにメッセージを入力..."></textarea>
+        <button id="send-button">送信</button>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
