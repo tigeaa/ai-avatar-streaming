@@ -19,7 +19,7 @@ export class AIController {
     async _fetchGeminiResponse(prompt, apiKey) {
         if (!apiKey) throw new Error('Gemini API key is missing.');
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         try {
             const response = await fetch(url, {
