@@ -5,6 +5,7 @@ export class AvatarController {
         this.avatar = avatar;
         this.isTalking = false;
         this.morphTargetMeshes = [];
+        this.gestureController = new GestureController(avatar); // 追加
 
         // Find all meshes with morph targets
         this.avatar.traverse(node => {
