@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GestureController } from './GestureController.js';
 
 export class AvatarController {
     constructor(avatar) {

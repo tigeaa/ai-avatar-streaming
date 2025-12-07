@@ -55,11 +55,16 @@ function setupSettingsUI(settingsManager) {
 }
 
 async function speak(speechController, avatarController, text) {
-    await speechController.speak(
-        text,
-        () => avatarController.startTalking(),
-        () => avatarController.stopTalking()
-    );
+    try {
+        await speechController.speak(
+            text,
+            () => avatarController.startTalking(),
+            () => avatarController.stopTalking()
+        );
+    } catch (error) {
+        console.error('Speech error:', error);
+        // Continue even if speech fails
+    }
 }
 
 async function main() {
@@ -71,6 +76,7 @@ async function main() {
     const aiController = new AIController(settingsManager);
     const studyController = new StudyModeController();
     let avatarController;
+    let avatarLoaded = false;
 
     setupSettingsUI(settingsManager);
     settingsManager.loadSettings();
@@ -79,10 +85,12 @@ async function main() {
         const avatar = await loadAvatar(scene);
         avatarController = new AvatarController(avatar);
         updatables.push(avatarController);
+        avatarLoaded = true;
+        hideStatus();
     } catch (error) {
         console.error("Failed to load avatar", error);
-        showStatus('アバターの読み込みに失敗しました。', true);
-        return;
+        showStatus('アバターの読み込みに失敗しました。ページをリロードしてください。', true);
+        // Continue with the application even if avatar fails to load
     }
 
     // --- Event Listeners ---
@@ -100,11 +108,18 @@ async function main() {
     completeStudyButton.addEventListener('click', async () => {
         studyController.completeStudySession();
         updateStudyUI('IDLE');
+        
+        if (!avatarLoaded) {
+            showStatus('アバターが読み込まれていません。', true);
+            return;
+        }
+        
         showStatus('AIが賞賛を生成中...');
         try {
             const message = await aiController.generateCompletionMessage();
             await speak(speechController, avatarController, message);
         } catch (e) {
+            console.error('Error generating completion message:', e);
             showStatus(e.message, true);
         } finally {
             hideStatus();
@@ -113,7 +128,14 @@ async function main() {
 
     sendButton.addEventListener('click', async () => {
         const text = textInput.value.trim();
-        if (!text || !avatarController) return;
+        if (!text) {
+            return;
+        }
+
+        if (!avatarLoaded) {
+            showStatus('アバターが読み込まれていません。', true);
+            return;
+        }
 
         sendButton.disabled = true;
         textInput.value = '';
@@ -123,6 +145,7 @@ async function main() {
             const aiResponse = await aiController.generateResponse(text);
             await speak(speechController, avatarController, aiResponse);
         } catch (error) {
+            console.error('Error generating response:', error);
             showStatus(error.message, true);
         } finally {
             hideStatus();
@@ -132,6 +155,11 @@ async function main() {
 
     // Setup the callback for the study timer
     studyController.setOnInterventionRequired(async (problemText, duration) => {
+        if (!avatarLoaded) {
+            showStatus('アバターが読み込まれていません。', true);
+            return;
+        }
+        
         showStatus('AIが声かけを準備中...');
         try {
             const message = await aiController.generateIntervention(problemText, duration);
@@ -141,6 +169,7 @@ async function main() {
             studyController.clearTimer();
 
         } catch (e) {
+            console.error('Error generating intervention:', e);
             showStatus(e.message, true);
         } finally {
             hideStatus();
