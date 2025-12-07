@@ -35,7 +35,10 @@ export class AvatarController {
         });
     }
 
-    update() {
+    update(deltaTime) {
+        // ジェスチャーコントローラーを更新
+        this.gestureController.update(deltaTime);
+
         if (this.isTalking) {
             // Create a simple oscillating value for the mouth opening
             const time = performance.now() * 0.005;
