@@ -57,7 +57,7 @@ ${problemText}`;
         const settings = this.settingsManager.getSettings();
         const apiKey = settings.geminiApiKey;
 
-        if (!apiKey) throw new Error('Gemini API key is missing.');
+        if (!apiKey) throw new Error('Gemini APIキーが設定されていません。設定画面でキーを入力してください。');
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
