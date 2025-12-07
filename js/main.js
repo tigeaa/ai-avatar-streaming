@@ -94,7 +94,7 @@ async function main() {
     }
 
     // --- Event Listeners ---
-    startStudyButton.addEventListener('click', () => {
+    startStudyButton.addEventListener('click', async () => {
         const problemText = problemInput.value.trim();
         if (!problemText) {
             alert('まず問題を入力してください。');
@@ -103,6 +103,10 @@ async function main() {
         const duration = parseInt(timerDurationInput.value, 10);
         studyController.startStudySession(duration, problemText);
         updateStudyUI('STUDYING');
+
+        if (avatarLoaded) {
+            await speak(speechController, avatarController, "頑張ってください！");
+        }
     });
 
     completeStudyButton.addEventListener('click', async () => {

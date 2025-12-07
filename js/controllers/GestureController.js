@@ -7,11 +7,10 @@ import * as THREE from 'three';
 export class GestureController {
     /**
      * @param {THREE.Object3D} avatar - Ready Player Meのアバターオブジェクト
-     * @param {THREE.AnimationMixer} mixer - A shared AnimationMixer instance
      */
-    constructor(avatar, mixer) {
+    constructor(avatar) {
         this.avatar = avatar;
-        this.mixer = mixer; // Use the shared mixer
+        this.mixer = new THREE.AnimationMixer(avatar);
         this.bones = {};
 
         // Find and store all bones
@@ -40,34 +39,21 @@ export class GestureController {
         const waveDuration = 4; // seconds
 
         // --- Keyframe Tracks ---
+        // 腕を上げる (Z軸回転) & 横に広げる (Y軸回転)
+        const rightArmZTrack = new THREE.NumberKeyframeTrack('RightArm.rotation[z]', [0, 1], [0, -1.5]);
+        const rightArmYTrack = new THREE.NumberKeyframeTrack('RightArm.rotation[y]', [0, 1], [0, -0.5]);
+        const leftArmZTrack = new THREE.NumberKeyframeTrack('LeftArm.rotation[z]', [0, 1], [0, 1.5]);
+        const leftArmYTrack = new THREE.NumberKeyframeTrack('LeftArm.rotation[y]', [0, 1], [0, 0.5]);
 
-        // 1. 腕を上げる (Z軸回転)
-        const rightArmZTrack = new THREE.NumberKeyframeTrack(
-            'RightArm.rotation[z]',
-            [0, 1],       // time (seconds)
-            [0, -2.0]     // value (radians)
-        );
-        const leftArmZTrack = new THREE.NumberKeyframeTrack(
-            'LeftArm.rotation[z]',
-            [0, 1],
-            [0, 2.0]
-        );
-
-        // 2. 腕を振る (X軸回転)
-        const rightArmXTrack = new THREE.NumberKeyframeTrack(
-            'RightArm.rotation[x]',
-            [1, 2, 3, 4], // time
-            [0, -0.5, 0.5, 0] // value
-        );
-         const leftArmXTrack = new THREE.NumberKeyframeTrack(
-            'LeftArm.rotation[x]',
-            [1, 2, 3, 4],
-            [0, -0.5, 0.5, 0]
-        );
+        // 腕を前後に振る (X軸回転)
+        const rightArmXTrack = new THREE.NumberKeyframeTrack('RightArm.rotation[x]', [1, 2, 3, 4], [0, -0.5, 0.5, 0]);
+        const leftArmXTrack = new THREE.NumberKeyframeTrack('LeftArm.rotation[x]', [1, 2, 3, 4], [0, -0.5, 0.5, 0]);
 
         const clip = new THREE.AnimationClip('waving-loop', -1, [
             rightArmZTrack,
+            rightArmYTrack,
             leftArmZTrack,
+            leftArmYTrack,
             rightArmXTrack,
             leftArmXTrack
         ]);
@@ -77,4 +63,13 @@ export class GestureController {
         action.play();
     }
 
+    /**
+     * アニメーションミキサーを更新
+     * @param {number} delta - 前回の更新からの経過時間
+     */
+    update(delta) {
+        if (this.mixer) {
+            this.mixer.update(delta);
+        }
+    }
 }

@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Three.js、Web Speech API、Ready Player Meを使用したAIアバター配信システム。リップシンク、ジェスチャー制御、自動瞬き機能を搭載。",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test playwright-tests/verification.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tigeaa/ai-avatar-streaming.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tigeaa/ai-avatar-streaming/issues"
+  },
+  "homepage": "https://github.com/tigeaa/ai-avatar-streaming#readme",
+  "dependencies": {
+    "jest": "^29.7.0",
+    "playwright": "^1.44.1"
+  }
+}
