@@ -5,6 +5,8 @@ import { AvatarController } from './controllers/AvatarController.js';
 import { SettingsManager } from './utils/SettingsManager.js';
 import { AIController } from './controllers/AIController.js';
 import { StudyModeController } from './controllers/StudyModeController.js';
+import { UserProfileManager } from './managers/UserProfileManager.js';
+import { OnboardingController } from './controllers/OnboardingController.js';
 
 // --- DOM Elements ---
 const statusDisplay = document.getElementById('status-display');
@@ -14,6 +16,8 @@ const problemInput = document.getElementById('problem-input');
 const timerDurationInput = document.getElementById('timer-duration');
 const sendButton = document.getElementById('send-button');
 const textInput = document.getElementById('text-input');
+const onboardingModal = document.getElementById('onboarding-modal');
+const startOnboardingButton = document.getElementById('start-onboarding-button');
 
 // --- UI Helper Functions ---
 function showStatus(message, isError = false) {
@@ -64,12 +68,41 @@ async function speak(speechController, avatarController, text) {
 
 async function main() {
     console.log("Application starting...");
+
+    const userProfileManager = new UserProfileManager();
+
+    // --- Onboarding Flow ---
+    if (!userProfileManager.isOnboardingComplete()) {
+        onboardingModal.style.display = 'flex';
+
+        const onTestComplete = (averageTime) => {
+            userProfileManager.completeOnboarding(averageTime);
+            // Show a completion message and then reload
+            const modalContent = document.querySelector('#onboarding-modal .modal-content');
+            modalContent.innerHTML = `
+                <h2>セットアップ完了！</h2>
+                <p>ありがとうございます。あなたの学習ペースを記録しました。</p>
+                <p>アプリケーションを再読み込みします...</p>
+            `;
+            setTimeout(() => {
+                location.reload();
+            }, 3000); // Wait 3 seconds before reloading
+        };
+
+        const onboardingController = new OnboardingController(onTestComplete);
+        startOnboardingButton.addEventListener('click', onboardingController.startTest);
+
+        // Stop further execution until onboarding is complete
+        return;
+    }
+
+    // --- Regular Application Flow ---
     const { scene, animate, updatables } = setupScene();
 
     const settingsManager = new SettingsManager();
     const speechController = new SpeechController();
     const aiController = new AIController(settingsManager);
-    const studyController = new StudyModeController();
+    const studyController = new StudyModeController(userProfileManager); // Pass the manager
     let avatarController;
 
     setupSettingsUI(settingsManager);
@@ -136,10 +169,7 @@ async function main() {
         try {
             const message = await aiController.generateIntervention(problemText, duration);
             await speak(speechController, avatarController, message);
-            // After intervention, stop the timer to prevent it from firing again,
-            // but keep the state as STUDYING until the user clicks "complete".
             studyController.clearTimer();
-
         } catch (e) {
             showStatus(e.message, true);
         } finally {

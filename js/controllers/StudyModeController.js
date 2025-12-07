@@ -5,24 +5,34 @@ const StudyState = {
 };
 
 export class StudyModeController {
-    constructor() {
+    constructor(userProfileManager) {
         this.state = StudyState.IDLE;
         this.timerId = null;
         this.onInterventionRequired = null; // Callback for when the timer fires
+        this.userProfileManager = userProfileManager;
     }
 
     /**
-     * Starts a new study session.
-     * @param {number} duration - The timer duration in seconds.
+     * Starts a new study session with a dynamically set timer.
+     * @param {number} manualDuration - The manually set timer duration in seconds.
      * @param {string} problemText - The text of the problem the user is working on.
      */
-    startStudySession(duration, problemText) {
+    startStudySession(manualDuration, problemText) {
         if (this.state !== StudyState.IDLE) {
             console.warn('Cannot start a new session while already in one.');
             return;
         }
 
-        console.log(`Starting study session for ${duration} seconds.`);
+        let sessionDuration = manualDuration;
+        const averageTime = this.userProfileManager.getAverageCalculationTime();
+
+        if (averageTime && averageTime > 0) {
+            sessionDuration = Math.round(averageTime * 2.0); // 200% of the user's average
+            console.log(`Personalized timer set to ${sessionDuration} seconds (based on user average of ${averageTime.toFixed(2)}s).`);
+        } else {
+            console.log(`Falling back to manual timer of ${sessionDuration} seconds.`);
+        }
+
         this.state = StudyState.STUDYING;
         this.clearTimer(); // Clear any existing timer just in case
 
@@ -31,10 +41,10 @@ export class StudyModeController {
                 console.log('Timer fired. Intervention required.');
                 this.state = StudyState.INTERVENING;
                 if (this.onInterventionRequired) {
-                    this.onInterventionRequired(problemText, duration);
+                    this.onInterventionRequired(problemText, sessionDuration);
                 }
             }
-        }, duration * 1000);
+        }, sessionDuration * 1000);
     }
 
     /**
