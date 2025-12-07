@@ -38,7 +38,7 @@ export class AvatarController {
     update() {
         if (this.isTalking) {
             // Create a simple oscillating value for the mouth opening
-            const time = Date.now() * 0.015;
+            const time = performance.now() * 0.005;
             const mouthOpenValue = (Math.sin(time) + 1) / 2; // Value between 0 and 1
             this.setExpression('mouthOpen', mouthOpenValue * 0.7); // Scale down to avoid extreme expressions
         }
