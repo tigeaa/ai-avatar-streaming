@@ -6,9 +6,15 @@ export class AvatarController {
         this.avatar = avatar;
         this.isTalking = false;
         this.morphTargetMeshes = [];
-        this.gestureController = new GestureController(avatar);
 
-        // Find all meshes with morph targets
+        // --- Core Animation Setup ---
+        // 1. Create a single AnimationMixer for the entire avatar
+        this.mixer = new THREE.AnimationMixer(this.avatar);
+
+        // 2. Initialize GestureController and pass the shared mixer to it
+        this.gestureController = new GestureController(avatar, this.mixer);
+
+        // Find all meshes with morph targets for lip-syncing
         this.avatar.traverse(node => {
             if (node.isMesh && node.morphTargetInfluences) {
                 this.morphTargetMeshes.push(node);
@@ -36,14 +42,17 @@ export class AvatarController {
     }
 
     update(deltaTime) {
-        // Update gesture animations
-        this.gestureController.update(deltaTime);
+        // --- Main Animation Loop ---
+        // 1. Update the AnimationMixer. This will update all animations,
+        // including gestures and any future animation clips.
+        this.mixer.update(deltaTime);
 
-        // Update lip-sync animation procedurally
+        // 2. Update lip-sync animation procedurally when talking
         if (this.isTalking) {
             const time = performance.now() * 0.005;
             const mouthOpenValue = (Math.sin(time * 20) + 1) / 2; // Faster oscillation
-            this.setExpression('mouthOpen', mouthOpenValue * 0.7);
+            // --- Make mouth movement more pronounced by increasing the multiplier ---
+            this.setExpression('mouthOpen', mouthOpenValue * 1.2);
         }
     }
 }
