@@ -43,12 +43,14 @@ export function setupScene() {
     resizeObserver.observe(container);
 
     // Animation loop
+    const clock = new THREE.Clock();
     const animate = () => {
         requestAnimationFrame(animate);
+        const deltaTime = clock.getDelta();
 
         // Call update on all updatable objects
         for (const object of updatables) {
-            object.update();
+            object.update(deltaTime);
         }
 
         renderer.render(scene, camera);
