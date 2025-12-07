@@ -105,26 +105,41 @@ async function main() {
         updateStudyUI('STUDYING');
 
         if (avatarLoaded) {
-            await speak(speechController, avatarController, "頑張ってください！");
+            showStatus('AIが応答を生成中...');
+            try {
+                // Send the problem to the AI and speak the initial response
+                const initialPrompt = `これから、以下の問題に取り組みます。まずは励ましの言葉をかけてください。\n\n問題：${problemText}`;
+                const aiResponse = await aiController.generateResponse(initialPrompt);
+                await speak(speechController, avatarController, aiResponse);
+            } catch (error) {
+                console.error('Error generating initial AI response:', error);
+                showStatus(error.message, true);
+                // Fallback to a default message if the API fails
+                await speak(speechController, avatarController, "頑張ってください！");
+            } finally {
+                hideStatus();
+            }
         }
     });
 
     completeStudyButton.addEventListener('click', async () => {
         studyController.completeStudySession();
         updateStudyUI('IDLE');
-        
+
         if (!avatarLoaded) {
             showStatus('アバターが読み込まれていません。', true);
             return;
         }
-        
+
         showStatus('AIが賞賛を生成中...');
         try {
             const message = await aiController.generateCompletionMessage();
             await speak(speechController, avatarController, message);
-        } catch (e) {
-            console.error('Error generating completion message:', e);
-            showStatus(e.message, true);
+        } catch (error) {
+            console.error('Error generating completion message:', error);
+            showStatus(error.message, true);
+            // Fallback message
+            await speak(speechController, avatarController, "お疲れ様でした！よく頑張りましたね。");
         } finally {
             hideStatus();
         }
@@ -151,6 +166,7 @@ async function main() {
         } catch (error) {
             console.error('Error generating response:', error);
             showStatus(error.message, true);
+            await speak(speechController, avatarController, "ごめんなさい、エラーが発生しました。");
         } finally {
             hideStatus();
             sendButton.disabled = false;

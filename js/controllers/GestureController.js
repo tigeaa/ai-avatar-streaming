@@ -7,10 +7,11 @@ import * as THREE from 'three';
 export class GestureController {
     /**
      * @param {THREE.Object3D} avatar - Ready Player Meのアバターオブジェクト
+     * @param {THREE.AnimationMixer} mixer - アバター全体で共有されるアニメーションミキサー
      */
-    constructor(avatar) {
+    constructor(avatar, mixer) {
         this.avatar = avatar;
-        this.mixer = new THREE.AnimationMixer(avatar);
+        this.mixer = mixer; // Use the mixer passed from AvatarController
         this.bones = {};
 
         // Find and store all bones
@@ -64,12 +65,12 @@ export class GestureController {
     }
 
     /**
-     * アニメーションミキサーを更新
-     * @param {number} delta - 前回の更新からの経過時間
+     * アニメーションミキサーの更新はAvatarControllerに任せるため、
+     * このクラスのupdateメソッドは不要になります。
      */
-    update(delta) {
-        if (this.mixer) {
-            this.mixer.update(delta);
-        }
-    }
+    // update(delta) {
+    //     if (this.mixer) {
+    //         this.mixer.update(delta);
+    //     }
+    // }
 }
